@@ -1,6 +1,5 @@
-﻿using Markdown;
-using Markdown.Models;
-using Markdown.Models.Interfaces;
+﻿using Markdown.Models.Interfaces;
+using Markdown.Models.TagTokens;
 using System;
 
 

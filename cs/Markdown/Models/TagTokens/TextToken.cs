@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Markdown.Models.Interfaces;
 
-namespace Markdown
+namespace Markdown.Models.TagTokens
 {
     public class TextToken : IToken
     {

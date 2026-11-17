@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Markdown.Models
+namespace Markdown.Models.TagTokens
 {
     public class TagToken : IToken
     {

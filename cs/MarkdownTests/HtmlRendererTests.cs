@@ -3,13 +3,15 @@ using Markdown;
 using FluentAssertions;
 using Markdown.Models.Interfaces;
 using Markdown.Models;
+using Markdown.Models.TagTokens;
+using Markdown.Models.TagInfos;
 
 namespace MarkdownUnitTests
 {
     [TestFixture]
     internal class HtmlRendererTests
     {
-        private IHtmlRenderer renderer;
+        private HtmlRenderer renderer;
 
         [SetUp]
         public void Setup()
@@ -162,6 +164,68 @@ namespace MarkdownUnitTests
         {
             var result = renderer.Render(tokens);
             result.Should().Be(expected);
+        }
+
+
+        [Test]
+        public void RenderTextToken_ReturnsExactContent_WhenTextTokenOnly()
+        {
+            var token = new TextToken("Hello World");
+
+            var result = renderer.RenderTextToken(token);
+
+            result.Should().Be("Hello World");
+
+        }
+
+        [Test]
+        public void RenderTagToken_WrapsChildrenCorrectly()
+        {
+            var tag = new PairedTagInfo("_", "em");
+            var children = new List<IToken> { new TextToken("em") };
+            var token = new TagToken(tag, children);
+
+            var result = renderer.RenderTagToken(token);
+
+            result.Should().Be("<em>em</em>");
+        }
+
+        [Test]
+        public void RenderTagToken_HandlesNestedTokens()
+        {
+            var strongTag = new PairedTagInfo("__", "strong");
+            var emTag = new PairedTagInfo("_", "em");
+
+            var children = new List<IToken>
+            {
+                new TextToken("Bold and "),
+                new TagToken(emTag, new List<IToken> { new TextToken("em") })
+            };
+            var token = new TagToken(strongTag, children);
+
+            var result = renderer.RenderTagToken(token);
+
+            result.Should().Be("<strong>Bold and <em>em</em></strong>");
+        }
+
+        [Test]
+        public void Render_CreatesValidListHtml_WhenGivenListTokens()
+        {
+            var ulTag = new CascadTagInfo();
+            var liTag = new SingleTagInfo("- ", "li");
+
+            var tokens = new List<IToken>
+            {
+                new TagToken(ulTag, new List<IToken>
+                {
+                    new TagToken(liTag, new List<IToken> { new TextToken("Первый пункт") }),
+                    new TagToken(liTag, new List<IToken> { new TextToken("Второй пункт") })
+                })
+            };
+
+            var result = renderer.Render(tokens);
+
+            result.Should().Be("<ul><li>Первый пункт</li><li>Второй пункт</li></ul>");
         }
     }
 }

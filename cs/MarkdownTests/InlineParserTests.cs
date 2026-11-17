@@ -56,7 +56,7 @@ namespace MarkdownUnitTests
 
             var result = parser.ParseToTokens(line);
             result.Should().HaveCount(1);
-            result[0].AsText().Should().BeEquivalentTo(new { Content = line });
+            result[0].AsText().Should().BeEquivalentTo(new { Content = "_text_" });
         }
 
         [Test]
@@ -67,13 +67,13 @@ namespace MarkdownUnitTests
             var result = parser.ParseToTokens(line);
 
             result.Should().HaveCount(1);
-            result[0].AsText().Should().BeEquivalentTo(new { Content = line });
+            result[0].AsText().Should().BeEquivalentTo(new { Content = "\\" });
         }
 
         [Test]
         public void ParseToTokens_ReturnsList_WhenSingleEmTokenWithText()
         {
-            var line = "<em>text</em>";
+            var line = "_text_";
 
             var result = parser.ParseToTokens(line);
 
@@ -88,7 +88,7 @@ namespace MarkdownUnitTests
         [Test]
         public void ParseToTokens_ReturnsList_WhenSingleStrongTokenWithText()
         {
-            var line = "<strong>text</strong>";
+            var line = "__text__";
 
             var result = parser.ParseToTokens(line);
 
@@ -246,5 +246,66 @@ namespace MarkdownUnitTests
             result3.Should().HaveCount(1);
             result3[0].AsText().Should().BeEquivalentTo(new { Content = "plain text" });
         }
+
+        [Test]
+        public void ParseToTokens_ReturnsListWithSingleToken_WhenTripleUnderscores()
+        {
+            var line = "___";
+
+            var result = parser.ParseToTokens(line);
+
+            result.Should().HaveCount(1);
+            result[0].AsText().Should().BeEquivalentTo(new { Content = line });
+        }
+
+        [Test]
+        public void ParseToTokens_ReturnsEmToken_WhenUnderscoreAtWordStart()
+        {
+            var line = "_нач_але";
+
+            var result = parser.ParseToTokens(line);
+
+            result.Should().HaveCount(2);
+            result[0].AsTag().Should().BeEquivalentTo(new
+            {
+                Tag = new { MarkdownSymbol = "_" },
+                Children = new[] { new { Content = "нач" } }
+            });
+            result[1].AsText().Should().BeEquivalentTo(new { Content = "але" });
+        }
+
+        [Test]
+        public void ParseToTokens_ReturnsListWithSingleToken_WhenDigitsInsideUnderscores()
+        {
+            var line = "цифрами_12_3";
+
+            var result = parser.ParseToTokens(line);
+
+            result.Should().HaveCount(1);
+            result[0].AsText().Should().BeEquivalentTo(new { Content = line });
+        }
+
+        [Test]
+        public void ParseToTokens_ReturnsListWithSingleToken_WhenTrailingBackslash()
+        {
+            var line = "some\\";
+
+            var result = parser.ParseToTokens(line);
+
+            result.Should().HaveCount(1);
+            result[0].AsText().Should().BeEquivalentTo(new { Content = line });
+        }
+
+        [Test]
+        public void ParseToTokens_ReturnsListWithSingleToken_WhenCrossedTags()
+        {
+            var line = "__пересечения_двойных__ и одинарных_";
+
+            var result = parser.ParseToTokens(line);
+
+            result.Should().HaveCount(1);
+            result[0].AsText().Should().BeEquivalentTo(new { Content = line });
+        }
+
     }
 }

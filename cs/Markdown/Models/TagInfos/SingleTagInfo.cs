@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Markdown.Models
+namespace Markdown.Models.TagInfos
 {
     public class SingleTagInfo : ITagInfo
     {

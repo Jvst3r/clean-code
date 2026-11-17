@@ -8,5 +8,7 @@ namespace Markdown
     public interface IInlineParser
     {
         public List<IToken> ParseToTokens(string line);
+
+        public List<IToken> ParseLines(string[] lines);
     }
 }

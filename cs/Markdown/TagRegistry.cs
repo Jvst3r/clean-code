@@ -1,4 +1,4 @@
-﻿using Markdown.Models;
+﻿using Markdown.Models.TagInfos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +22,14 @@ namespace Markdown
                 new SingleTagInfo("- ", "li")
         };
 
+        private static CascadTagInfo listTag = new CascadTagInfo();
+
         public static IEnumerable<PairedTagInfo> GetPairedTags()
                 => pairedTags.OrderByDescending(t => t.Length);
 
         public static IEnumerable<SingleTagInfo> GetSingleTags()
             => singleTags;
+
+        public static CascadTagInfo GetCascadTag() => listTag;
     }
 }

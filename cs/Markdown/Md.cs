@@ -1,7 +1,11 @@
-﻿namespace Markdown
+﻿using Markdown.Models.Interfaces;
+using System.Reflection.Metadata.Ecma335;
+using System.Text;
+
+namespace Markdown
 {
     /// <summary>
-    /// Публичный класс, проверяет наличие нумерованных списков
+    /// Публичный класс - интефейс между пользователем и логикой (оркестратор это вроде называется)
     /// </summary>
     public class Md
     {
@@ -16,20 +20,15 @@
 
         public string Render(string  markdownText)
         {
+            if (string.IsNullOrEmpty(markdownText))
+                return string.Empty;
 
-            //разбиваем на строки
-            //отдаем строки в parser -> токены
-            //токены отдаем в renderer -> строки
-            //строки собираем в html текст
-            //return htmlText;
-            throw new NotImplementedException ();
+            var lines = markdownText.Split('\n', '\r');
+            //var HtmlText = new StringBuilder()
+            var tokens = parser.ParseLines(lines);
+            var htmlText = renderer.Render(tokens);
+
+            return htmlText;
         }
-
-        public string RenderHeader(string line) => line.StartsWith("# ") ? $"<h1>{line.Skip(2)}</h1>" : line;
-
-        public string RenderUnnumerableListItem(string line) => line.StartsWith("- ") ? $"<li>{line.Skip(2)}</li>" : line;
-        public string RenderListStart(string line) => $"<ul> /r/n{line}";
-        public string RenderListEnd(string line) => $"line/r/n</ul>/r/n";
-        
     }
 }
