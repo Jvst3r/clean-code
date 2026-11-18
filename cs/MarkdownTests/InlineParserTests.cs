@@ -1,9 +1,11 @@
-using NUnit.Framework;
-using Markdown;
 using FluentAssertions;
-using MarkdownUnitTests.Extensions;
-using Markdown.Models.Interfaces;
+using Markdown;
 using Markdown.Models;
+using Markdown.Models.Interfaces;
+using Markdown.Models.TagInfos;
+using Markdown.Models.TagTokens;
+using MarkdownUnitTests.Extensions;
+using NUnit.Framework;
 
 namespace MarkdownUnitTests
 {
@@ -132,7 +134,7 @@ namespace MarkdownUnitTests
         }
 
         [TestCase("_")]
-        [TestCase("__")]
+        [TestCase("__")] //текст по спецификации неправильный, переделать
         public void ParseToTokens_ReturnsListWithSingleToken_WhenTagsInInvalidPlace(string tagText)
         {
             var line = $"{tagText}tex{tagText}t";
@@ -296,7 +298,7 @@ namespace MarkdownUnitTests
             result[0].AsText().Should().BeEquivalentTo(new { Content = line });
         }
 
-        [Test]
+        [Test] //вот дл€ этого теста нужно ввести проверку на вложенность
         public void ParseToTokens_ReturnsListWithSingleToken_WhenCrossedTags()
         {
             var line = "__пересечени€_двойных__ и одинарных_";
@@ -307,5 +309,105 @@ namespace MarkdownUnitTests
             result[0].AsText().Should().BeEquivalentTo(new { Content = line });
         }
 
+        [Test]
+        public void ParseLines_ReturnsH1Token_WhenLineStartsWithHash()
+        {
+            var lines = new[] { "# «аголовок" };
+
+            var result = parser.ParseLines(lines);
+
+            result.Should().HaveCount(1);
+            result[0].Should().BeEquivalentTo(new TagToken(
+                new SingleTagInfo("# ", "h1"),
+                new List<IToken> { new TextToken("«аголовок") }
+            ));
+        }
+
+        [Test]
+        public void ParseLines_ParsesInlineFormatting_WhenInsideHeader()
+        {
+            var lines = new[] { "# “екст с _курсивом_" };
+
+            var result = parser.ParseLines(lines);
+
+            result.Should().HaveCount(1);
+            result[0].Should().BeEquivalentTo(new TagToken(
+                new SingleTagInfo("# ", "h1"),
+                new List<IToken>
+                {
+                    new TextToken("“екст с "),
+                    new TagToken(
+                            new PairedTagInfo("_", "em"),
+                            new List<IToken> { new TextToken("курсивом") }
+                )
+                }
+            ));
+        }
+
+        [Test]
+        public void ParseLines_SingleListItemInUl()
+        {
+            var lines = new[] { "- один пункт" };
+
+            var result = parser.ParseLines(lines);
+
+            result.Should().HaveCount(1);
+            result[0].Should().BeOfType<CascadTagToken>();
+            result[0].Should().BeEquivalentTo(new CascadTagToken(
+                new CascadTagInfo(),
+                new List<IToken>
+                {
+                    new TagToken(
+                        new SingleTagInfo("- ", "li"),
+                        new List<IToken> { new TextToken("один пункт") }
+                    )
+                }
+            ));
+        }
+
+        [Test]
+        public void ParseLines_GroupsConsecutiveListItemsIntoSingleUl()
+        {
+            var lines = new[] { "- первый", "- второй", "- третий" };
+
+            var result = parser.ParseLines(lines);
+
+            result.Should().HaveCount(1);
+            result[0].Should().BeOfType<CascadTagToken>();
+            result[0].Should().BeEquivalentTo(new CascadTagToken(
+                new CascadTagInfo(),
+                new List<IToken>
+                {
+                    new TagToken(new SingleTagInfo("- ", "li"), new List<IToken> { new TextToken("первый") }),
+                    new TagToken(new SingleTagInfo("- ", "li"), new List<IToken> { new TextToken("второй") }),
+                    new TagToken(new SingleTagInfo("- ", "li"), new List<IToken> { new TextToken("третий") })
+                }
+            ));
+        }
+
+        [Test]
+        public void ParseLines_ParsesInlineFormatting_WhenInsideListItem()
+        {
+            var lines = new[] { "- _курсив_ и __жирный__" };
+
+            var result = parser.ParseLines(lines);
+
+            result.Should().HaveCount(1);
+            result[0].Should().BeEquivalentTo(new CascadTagToken(
+                new CascadTagInfo(),
+                new List<IToken>
+                {
+                    new TagToken(
+                        new SingleTagInfo("- ", "li"),
+                        new List<IToken>
+                        {
+                            new TagToken(new PairedTagInfo("_", "em"), new List<IToken> { new TextToken("курсив") }),
+                            new TextToken(" и "),
+                            new TagToken(new PairedTagInfo("__", "strong"), new List<IToken> { new TextToken("жирный") })
+                        }
+                    )
+                }
+            ));
+        }
     }
 }
