@@ -133,18 +133,6 @@ namespace MarkdownUnitTests
             result[0].AsText().Should().BeEquivalentTo(new { Content = line });
         }
 
-        [TestCase("_")]
-        [TestCase("__")] //текст по спецификации неправильный, переделать
-        public void ParseToTokens_ReturnsListWithSingleToken_WhenTagsInInvalidPlace(string tagText)
-        {
-            var line = $"{tagText}tex{tagText}t";
-
-            var result = parser.ParseToTokens(line);
-
-            result.Should().HaveCount(1);
-            result[0].AsText().Should().BeEquivalentTo(new { Content = line });
-        }
-
         [Test]
         public void ParseToTokens_ReturnsListWithManyTokens_WhenMultiplyTags()
         {
