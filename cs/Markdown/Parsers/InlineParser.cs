@@ -143,8 +143,8 @@ namespace Markdown
                 {
 
                     var contentStart = i + openingTag.Length;
-                    var newline = line.IndexOf('\n', contentStart, Math.Max(0, end - contentStart)); //исправить
-                    var contentEnd = newline >= 0 ? newline : end; //исправить
+                    var newline = line.IndexOf('\n', contentStart, Math.Max(0, end - contentStart));
+                    var contentEnd = newline >= 0 ? newline : end;
 
                     var closingIndex = FindClosingTag(line, contentStart, contentEnd, openingTag);
 
@@ -286,7 +286,7 @@ namespace Markdown
              //   return false;
 
             var beforeIndex = index - 1;
-            return beforeIndex >= 0 && !char.IsWhiteSpace(line[beforeIndex]); //исправить
+            return beforeIndex >= 0 && !char.IsWhiteSpace(line[beforeIndex]);
         }
 
         private bool IsPartOfLongerTag(string line, int index, int end, PairedTagInfo tag)
