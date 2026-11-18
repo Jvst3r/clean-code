@@ -18,15 +18,20 @@ public class MarkdownBenchmarks
         parser = new InlineParser();
         renderer = new HtmlRenderer();
 
-        md = new Md(parser,renderer);
+        md = new Md(parser, renderer);
 
         input = new string('a', countOfSymbols);
 
-        textWithLists = string.Join("\n",Enumerable.Range(0,countOfSymbols/20).Select(i => $"- item {i}"));
-        textWithTags = string.Join(" ", "__strong__ _em_");
+        var listPattern = "- item\n";
+        var listRepeats = Math.Max(1, countOfSymbols / listPattern.Length);
+        textWithLists = string.Concat(Enumerable.Repeat(listPattern, listRepeats));
+
+        var tagPattern = "_word_ ";
+        var tagRepeats = Math.Max(1, countOfSymbols / tagPattern.Length);
+        textWithTags = string.Concat(Enumerable.Repeat(tagPattern, tagRepeats));
     }
 
-    [Benchmark]
+        [Benchmark]
     public void Render_OnlyText()
     {
         md.Render(input);
