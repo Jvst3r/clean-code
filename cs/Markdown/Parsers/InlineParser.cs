@@ -207,29 +207,43 @@ namespace Markdown
 
         private bool IsCrossed(string line, int index, int end, PairedTagInfo targetTag)
         {
-            var otherTag = pairedTags.FirstOrDefault(t => t != targetTag);
+            var otherTag = pairedTags.FirstOrDefault(t => t.MarkdownSymbol != targetTag.MarkdownSymbol);
 
             if (otherTag == null)
                 return false;
 
             for (var i = index; i < end; i++)
             {
-                if (IsEscaping(line,i))
+                if (IsEscaping(line, i))
                 {
+                    i++;
                     continue;
                 }
 
-                if (IsValidStartingTag(line,i,end, otherTag))
+                if (StartsMarkerAt(line, i, end, otherTag))
                 {
-                    var otherClose = FindClosingTag(line,i + otherTag.Length
-                                                    ,end, otherTag);
+                    var otherClose = -1;
 
-                    if (otherClose == -1) //Внутри targetTag нет конца otherTag
+                    for (var j = i + otherTag.Length; j < end; j++)
+                    {
+                        if (IsEscaping(line, j))
+                        {
+                            j++;
+                            continue;
+                        }
+
+                        if (StartsMarkerAt(line, j, end, otherTag))
+                        {
+                            otherClose = j;
+                            break;
+                        }
+                    }
+                    if (otherClose == -1)
                     {
                         return true;
                     }
 
-                    i = otherClose + otherTag.Length;
+                    i = otherClose + otherTag.Length - 1;
                     continue;
                 }
             }
