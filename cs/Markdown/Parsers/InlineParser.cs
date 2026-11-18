@@ -205,9 +205,35 @@ namespace Markdown
             return null;
         }
 
-        private bool IsCrossed(string line, int index, int end, ITagInfo tag)
+        private bool IsCrossed(string line, int index, int end, PairedTagInfo targetTag)
         {
-            return true;
+            var otherTag = pairedTags.FirstOrDefault(t => t != targetTag);
+
+            if (otherTag == null)
+                return false;
+
+            for (var i = index; i < end; i++)
+            {
+                if (IsEscaping(line,i))
+                {
+                    continue;
+                }
+
+                if (IsValidStartingTag(line,i,end, otherTag))
+                {
+                    var otherClose = FindClosingTag(line,i + otherTag.Length
+                                                    ,end, otherTag);
+
+                    if (otherClose == -1) //Внутри targetTag нет конца otherTag
+                    {
+                        return true;
+                    }
+
+                    i = otherClose + otherTag.Length;
+                    continue;
+                }
+            }
+            return false;
         }
 
         private int FindClosingTag(string line, int index, int end, PairedTagInfo tag)
