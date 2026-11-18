@@ -205,6 +205,11 @@ namespace Markdown
             return null;
         }
 
+        private bool IsCrossed(string line, int index, int end, ITagInfo tag)
+        {
+            return true;
+        }
+
         private int FindClosingTag(string line, int index, int end, PairedTagInfo tag)
         {
             for (var i = index; i < end; i++)
@@ -216,7 +221,13 @@ namespace Markdown
                 }
 
                 if (IsValidEndingTag(line, i, end, tag))
+                {
+                    if (IsCrossed(line, index, i, tag))
+                    {
+                        continue;
+                    }
                     return i;
+                }
             }
             return -1;
         }
