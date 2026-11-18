@@ -10,6 +10,10 @@ namespace MarkdownUnitTests
     [TestFixture]
     internal class MdTests
     {
-        
+        [Test]
+        public void Render_ReturnsHtmlText_RunsInOfromN()
+        {
+            return;
+        }
     }
 }
